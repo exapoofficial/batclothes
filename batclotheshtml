@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B@T Store | Products</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: black;
+      color: white;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1em;
+      background-color: #111;
+      border-bottom: 1px solid #333;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+    header img {
+      height: 50px;
+      border-radius: 10px;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+    .header-left h1 {
+      margin-left: 10px;
+    }
+    .header-right button, .header-right a {
+      margin-left: 10px;
+      background: linear-gradient(145deg, #b30000, #ff1a1a);
+      color: white;
+      border: none;
+      padding: 0.5em 1em;
+      cursor: pointer;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+
+    /* Marquee style */
+    .marquee-container {
+      width: 100%;
+      background-color: red;
+      color: white;
+      padding: 5px 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1001; /* Above header */
+      overflow: hidden; /* Hide overflow for sliding text */
+      white-space: nowrap; /* Keep text on single line */
+      box-sizing: border-box;
+    }
+    .marquee-text {
+      display: inline-block;
+      padding-left: 100%; /* Start text off-screen to the right */
+      animation: marquee 15s linear infinite; /* Adjust duration for speed */
+    }
+    @keyframes marquee {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(-100%, 0); } /* Move to the left by its own width */
+    }
+
+    .intro-text {
+      padding-top: 130px; /* Adjusted to account for marquee */
+      text-align: center;
+      font-size: 28px;
+      margin: 40px 20px 20px;
+      color: #ccc;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 20px;
+    }
+    .product {
+      background: #111;
+      padding: 20px;
+      border-radius: 16px;
+      text-align: center;
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+    .product:hover {
+      transform: scale(1.02);
+    }
+    .product img {
+      max-width: 100%;
+      border-radius: 12px;
+    }
+    .product-summer-tag {
+      color: #FFD700; /* Gold color for the limited tag */
+      font-weight: bold;
+      margin-top: 5px;
+      margin-bottom: 10px;
+      font-size: 0.9em;
+    }
+    .product-price-old {
+      text-decoration: line-through;
+      color: #888; /* Lighter color for old price */
+      margin-right: 10px;
+    }
+    .product-buttons {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      margin-top: 10px;
+    }
+    .product:hover .product-buttons {
+      opacity: 1;
+      animation: fadeIn 0.5s ease forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .product-buttons button {
+      margin: 5px;
+      padding: 6px 12px;
+      font-size: 14px;
+      background: linear-gradient(145deg, #b30000, #ff1a1a);
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+    #cart-modal, #product-modal, #checkout-page, #size-selection-modal { /* Added size-selection-modal */
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      justify-content: center;
+      align-items: center;
+      padding: 2em;
+      overflow: auto;
+      z-index: 999;
+      animation: slideIn 0.4s ease;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-content {
+      background: #111;
+      padding: 20px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 600px;
+      position: relative;
+    }
+    /* Specific adjustment for product modal content */
+    #product-modal .modal-content, #size-selection-modal .modal-content { /* Added size-selection-modal */
+      max-width: 400px; /* Reduced max-width for product and size modal */
+      padding: 15px; /* Slightly reduced padding */
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      background: linear-gradient(145deg, #b30000, #ff1a1a);
+      color: white;
+      border: none;
+      padding: 0.5em;
+      border-radius: 16px;
+    }
+    form input[type="text"], form input[type="email"], #size-select { /* Added #size-select */
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: none;
+      border-radius: 8px;
+      background-color: #333; /* Darker background for inputs */
+      color: white;
+      box-sizing: border-box; /* Include padding in width */
+    }
+    form button, #size-selection-modal button { /* Added size-selection-modal button */
+      background: linear-gradient(145deg, #b30000, #ff1a1a);
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    /* Style for the larger checkmark and message */
+    #delivery-message {
+      font-size: 1.2em; /* Makes the text bigger */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      margin-top: 15px;
+      color: #4CAF50; /* Green color for the message */
+      display: none; /* Hidden by default */
+    }
+    #delivery-message .checkmark {
+      font-size: 1.8em; /* Makes the checkmark bigger */
+      margin-right: 10px;
+    }
+    /* Style for the disclaimer text on checkout page */
+    .checkout-disclaimer {
+      color: #FFD700; /* Gold color for warning/disclaimer */
+      font-weight: bold;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="marquee-container">
+    <div class="marquee-text">
+      OUR SUMMER CLOTHES ARE LIMITED FOR ONLY THIS SUMMER! &nbsp;&nbsp;&nbsp;&nbsp; OUR SUMMER CLOTHES ARE LIMITED FOR ONLY THIS SUMMER! &nbsp;&nbsp;&nbsp;&nbsp;
+    </div>
+  </div>
+
+  <header>
+    <div class="header-left">
+      <img src="https://media.discordapp.net/attachments/1378721352361443338/1385257089777143960/white-bat-silhouette-7017516945133430yggof56jm-removebg-preview.png?ex=685568b3&is=68541733&hm=21a28afc7ee8a782ae08320e47c82eb2eaf3b49521afc0a7c162ed18acb0b4c9&=&format=webp&quality=lossless&width=900&height=900" alt="B@T Logo">
+      <h1>B@T</h1>
+    </div>
+    <div class="header-right">
+      <a href="#" onclick="goHome()">Home</a>
+      <button onclick="toggleCart()">Cart (<span id="cart-count">0</span>)</button>
+    </div>
+  </header>
+
+  <div class="intro-text">
+    Welcome to B@T
+Modern. Clean. Effortless.
+
+B@T offers sleek, modern clothing designed for everyday confidence. Our collection focuses on clean lines, quality fabrics, and timeless style.
+
+Discover pieces that fit your lifestyle — simple, refined, and made to move with you.
+
+B@T — style made easy.<br>
+  </div>
+
+  <div class="products" id="product-list"></div>
+
+  <div id="cart-modal">
+    <div class="modal-content">
+      <button class="close-btn" onclick="toggleCart()">X</button>
+      <h2>Your Cart (<span id="cart-count-2">0</span>)</h2>
+      <div id="cart-items"></div>
+      <p>Total: <span id="cart-total">0</span> EUR</p>
+      <button onclick="checkout()">Checkout</button>
+      <button style="margin-top: 10px;" onclick="eraseCart()">Erase Cart</button>
+    </div>
+  </div>
+
+  <div id="product-modal">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeProductModal()">X</button>
+      <img id="modal-img" src="" alt="" style="width:100%">
+      <h3 id="modal-title"></h3>
+      <p id="modal-desc"></p>
+      <p>
+        <span id="modal-old-price" class="product-price-old"></span>
+        <span id="modal-price"></span>
+      </p>
+      <p class="product-summer-tag">Limited Only For This Summer!</p>
+    </div>
+  </div>
+
+  <div id="size-selection-modal">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeSizeSelectionModal()">X</button>
+      <h3>Select a Size for <span id="size-product-title"></span></h3>
+      <select id="size-select">
+        </select>
+      <button onclick="confirmSize()">Confirm</button>
+    </div>
+  </div>
+
+  <div id="checkout-page">
+    <div class="modal-content" style="max-width: 700px; font-size: 18px;">
+      <h2>Checkout</h2>
+      <p class="checkout-disclaimer">Disclaimer! Shipping takes around 10-30 days!</p>
+      <form id="checkout-form" onsubmit="submitOrder(event)">
+        <input type="text" required id="name" placeholder="Name"><br>
+        <input type="text" required id="lastname" placeholder="Last Name"><br>
+        <input type="email" required id="email" placeholder="Email"><br>
+        <input type="text" required id="address" placeholder="Address"><br>
+        <input type="text" required id="postcode" placeholder="Post Code"><br>
+        <input type="text" required id="house" placeholder="House Number/House Name"><br><br>
+        <label><input type="checkbox" required> Pay with PayPal</label><br><br>
+        <p>Price: <span id="checkout-price">0</span> EUR</p>
+        <p>Final Price + Delivery Fee (8€): <span id="checkout-final">8</span> EUR</p>
+        <button type="submit">Buy</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const products = [
+      {
+        id: 0,
+        title: "B@T Bucket Hat",
+        desc: "Good Quality B@T Bucket Hat",
+        oldPrice: 65.99,
+        price: 52.99,
+        img: "https://media.discordapp.net/attachments/1378721352361443338/1385260667803795476/HAT.jpg?ex=68556c08&is=68541a88&hm=f7e280098308ca091eccb137ec54285cc33c3fcd4251109b6904624a394bd9ac&=&format=webp&width=1107&height=1107",
+        sizes: ["Small", "Large"]
+      },
+      {
+        id: 1,
+        title: "B@T T-Shirt",
+        desc: "Good Quality B@T T-Shirt",
+        oldPrice: 69.99,
+        price: 55.99,
+        img: "https://media.discordapp.net/attachments/1378721352361443338/1385260668390998267/shirt.jpg?ex=68556c08&is=68541a88&hm=d357e2ad31692e84c1a1c9cd4795c1aa928f5b6f203cd8ae984b9f21fe52b7de&=&format=webp&width=1107&height=1107",
+        sizes: ["Extra Small", "Small", "Medium", "Large"]
+      },
+      {
+        id: 2,
+        title: "B@T Shorts",
+        desc: "Good Quality B@T Shorts",
+        oldPrice: 75.99,
+        price: 58.99,
+        img: "https://media.discordapp.net/attachments/1378721352361443338/1385260668122300457/PANTS.jpg?ex=68556c08&is=68541a88&hm=727ea11ce21cbac15ced8a75f40cfca61a45230f6713d84b9f6b1b3ebf6043b9&=&format=webp&width=1107&height=1107",
+        sizes: ["Large"]
+      }
+    ];
+
+    let cart = [];
+    let currentProductToAddId = null; // To store the ID of the product for size selection
+
+    function renderProducts() {
+      const list = document.getElementById("product-list");
+      list.innerHTML = "";
+      products.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "product";
+        div.innerHTML = `
+          <img src="${p.img}" alt="${p.title}">
+          <h3>${p.title}</h3>
+          <p>${p.desc}</p>
+          <p class="product-summer-tag">Limited Only For This Summer!</p>
+          <p>
+            <span class="product-price-old">${p.oldPrice.toFixed(2)} EUR</span>
+            ${p.price.toFixed(2)} EUR
+          </p>
+          <div class="product-buttons">
+            <button onclick='openSizeSelection(${p.id})'>Add To Cart</button> <button onclick='showProduct(${p.id})'>Check The Product</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function updateCartCount() {
+      document.getElementById("cart-count").textContent = cart.length;
+      document.getElementById("cart-count-2").textContent = cart.length;
+    }
+
+    function openSizeSelection(id) {
+      closeAllModals(); // Close any other open modals
+      currentProductToAddId = id;
+      const product = products.find(p => p.id === id);
+      const sizeSelect = document.getElementById("size-select");
+      const sizeProductTitle = document.getElementById("size-product-title");
+
+      sizeProductTitle.textContent = product.title;
+      sizeSelect.innerHTML = ""; // Clear previous options
+
+      if (product.sizes && product.sizes.length > 0) {
+        product.sizes.forEach(size => {
+          const option = document.createElement("option");
+          option.value = size;
+          option.textContent = size;
+          sizeSelect.appendChild(option);
+        });
+      } else {
+        // Fallback if a product somehow has no sizes defined (shouldn't happen with current data)
+        const option = document.createElement("option");
+        option.value = "N/A";
+        option.textContent = "Not Applicable";
+        sizeSelect.appendChild(option);
+      }
+
+      document.getElementById("size-selection-modal").style.display = "flex";
+    }
+
+    function closeSizeSelectionModal() {
+      document.getElementById("size-selection-modal").style.display = "none";
+      currentProductToAddId = null; // Clear the stored product ID
+    }
+
+    function confirmSize() {
+      const selectedSize = document.getElementById("size-select").value;
+      if (!selectedSize || selectedSize === "Select a Size") { // Added check for default option
+        alert("Please select a size.");
+        return;
+      }
+
+      const product = products.find(p => p.id === currentProductToAddId);
+      if (product) {
+        cart.push({ product: product, size: selectedSize }); // Store product object and selected size
+        updateCartCount();
+        alert(`${product.title} (${selectedSize}) added to cart!`);
+      }
+      closeSizeSelectionModal();
+    }
+
+    function toggleCart() {
+      const modal = document.getElementById("cart-modal");
+      modal.style.display = modal.style.display === "flex" ? "none" : "flex";
+      renderCart();
+    }
+
+    function eraseCart() {
+      cart = [];
+      updateCartCount();
+      renderCart();
+    }
+
+    function renderCart() {
+      const items = document.getElementById("cart-items");
+      let total = 0;
+      items.innerHTML = "";
+      cart.forEach(item => { // item is now {product: ..., size: ...}
+        items.innerHTML += `<p>${item.product.title} (${item.size}) - ${item.product.price.toFixed(2)} EUR</p>`;
+        total += item.product.price;
+      });
+      document.getElementById("cart-total").textContent = total.toFixed(2);
+      updateCartCount();
+    }
+
+    function showProduct(id) {
+      closeAllModals();
+      const p = products.find(prod => prod.id === id);
+      document.getElementById("modal-img").src = p.img;
+      document.getElementById("modal-title").textContent = p.title;
+      document.getElementById("modal-desc").textContent = p.desc;
+      document.getElementById("modal-old-price").textContent = `${p.oldPrice.toFixed(2)} EUR`;
+      document.getElementById("modal-price").textContent = `${p.price.toFixed(2)} EUR`;
+      document.getElementById("product-modal").style.display = "flex";
+    }
+
+    function closeProductModal() {
+      document.getElementById("product-modal").style.display = "none";
+    }
+
+    function checkout() {
+      closeAllModals();
+      document.getElementById("checkout-page").style.display = "flex";
+      const total = cart.reduce((sum, item) => sum + item.product.price, 0); // Access item.product.price
+      document.getElementById("checkout-price").textContent = total.toFixed(2);
+      document.getElementById("checkout-final").textContent = (total + 8).toFixed(2);
+    }
+
+    function generateOrderNumber() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@@#!#!@#**()';
+      return Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    }
+
+    function handlePayPalRedirect() {
+      window.open('https://paypal.me/test', '_blank');
+      document.getElementById("paypal-button").style.display = 'none';
+      const deliveryMessageElement = document.getElementById("delivery-message");
+      deliveryMessageElement.style.display = 'flex';
+    }
+
+    function submitOrder(e) {
+      e.preventDefault();
+      const name = document.getElementById("name").value;
+      const lastname = document.getElementById("lastname").value;
+      const email = document.getElementById("email").value;
+      const address = document.getElementById("address").value;
+      const postcode = document.getElementById("postcode").value;
+      const house = document.getElementById("house").value;
+      const total = cart.reduce((sum, item) => sum + item.product.price, 0); // Access item.product.price
+      const finalPrice = total + 8;
+      const orderNumber = generateOrderNumber();
+
+      // Modify orderDetails to include size
+      const orderDetails = cart.map(item => `${item.product.title} (Size: ${item.size}) - ${item.product.price.toFixed(2)} EUR`).join('\n');
+      const payload = {
+        content: `🧾 New Order Received:\n\n👤 Name: ${name} ${lastname}\n📧 Email: ${email}\n🏠 Address: ${address}, ${postcode}, ${house}\n\n🛒 Items:\n${orderDetails}\n📦 Delivery Fee: 8 EUR\n💶 Total: ${finalPrice.toFixed(2)} EUR\n📋 Order Number: ${orderNumber}`
+      };
+
+      fetch("https://discord.com/api/webhooks/1384077758673715210/I9AV9Y0B48TvRNUSWdOso4GR0JUCWZee4YplTmK858Q68mp0ZjWxy3l_6Qif_rpSzEsX", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      document.body.innerHTML = `<div style='padding: 3em; text-align: center; font-size: 20px;'>
+        ✅ Order Successful!<br><br>
+        🧾 Order Number: <strong>${orderNumber}</strong><br><br>
+        📌 Please add this order number in the notes of your PayPal payment.<br><br>
+        <button id="paypal-button" onclick="handlePayPalRedirect()">Continue to PayPal</button>
+        <p style="margin-top: 20px;">Price you need to pay in PayPal: <span style="font-size: 1.5em; font-weight: bold;">${finalPrice.toFixed(2)} EUR</span></p>
+        <p id="delivery-message">
+          <span class="checkmark">&#10003;</span>
+          <span>After you pay, your order will be delivered in 10-30 Days. We will send you updates via email.</span>
+        </p>
+      </div>`;
+    }
+
+    function goHome() {
+      closeAllModals();
+      window.scrollTo(0, 0);
+    }
+
+    function closeAllModals() {
+      document.getElementById("cart-modal").style.display = "none";
+      document.getElementById("product-modal").style.display = "none";
+      document.getElementById("checkout-page").style.display = "none";
+      document.getElementById("size-selection-modal").style.display = "none"; // Close size modal too
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>
